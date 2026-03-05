@@ -49,66 +49,76 @@ class Game:
     # Bucle principal
     # ──────────────────────────────────────────
     def run(self):
-        while True:
-            dt = self.clock.tick(FPS) / 1000.0
+        """Bucle bloqueante para uso desktop (sin Pygbag)."""
+        while self.tick():
+            pass
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        if self.overlay.visible:
-                            self.overlay.hide()
-                        elif self.win.visible:
-                            self._next_or_restart()
-                        else:
-                            return
+    def tick(self) -> bool:
+        """Procesa un frame. Retorna False cuando el juego debe cerrar.
 
-                    if not self.overlay.visible and not self.win.visible:
-                        if event.key == pygame.K_1:
-                            self.panel.set_tab_by_index(0)
-                        elif event.key == pygame.K_2:
-                            self.panel.set_tab_by_index(1)
-                        elif event.key == pygame.K_3:
-                            self.panel.set_tab_by_index(2)
+        Separado de run() para compatibilidad con el loop asíncrono
+        de Pygbag (WebAssembly).
+        """
+        dt = self.clock.tick(FPS) / 1000.0
 
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.win.visible:
-                        action = self.win.handle_click(event.pos)
-                        if action == "next":
-                            self._advance_level()
-                        elif action == "restart":
-                            self._init_level()
-                    elif self.overlay.visible:
-                        self.overlay.handle_click(event.pos)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if self.overlay.visible:
+                        self.overlay.hide()
+                    elif self.win.visible:
+                        self._next_or_restart()
                     else:
-                        self.panel.handle_click(event.pos)
+                        return False
 
-                if event.type == pygame.MOUSEMOTION:
-                    if not self.overlay.visible and not self.win.visible:
-                        self.panel.handle_motion(event.pos)
+                if not self.overlay.visible and not self.win.visible:
+                    if event.key == pygame.K_1:
+                        self.panel.set_tab_by_index(0)
+                    elif event.key == pygame.K_2:
+                        self.panel.set_tab_by_index(1)
+                    elif event.key == pygame.K_3:
+                        self.panel.set_tab_by_index(2)
 
-            # ── Update ──
-            self.city.update(dt, self.state)
-            self.panel.update(dt)
-            self.overlay.update(dt)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if self.win.visible:
+                    action = self.win.handle_click(event.pos)
+                    if action == "next":
+                        self._advance_level()
+                    elif action == "restart":
+                        self._init_level()
+                elif self.overlay.visible:
+                    self.overlay.handle_click(event.pos)
+                else:
+                    self.panel.handle_click(event.pos)
 
-            # ── Draw ──
-            self.screen.fill(C_BG)
-            self._draw_grid()
-            city_surf = self.city.draw()
-            self.screen.blit(city_surf, (0, HEADER_HEIGHT))
-            self.hud.draw(self.state)
-            self.panel.draw()
-            pygame.draw.line(self.screen, C_DIM,
-                             (CITY_WIDTH, HEADER_HEIGHT),
-                             (CITY_WIDTH, SCREEN_HEIGHT), 1)
-            if self.overlay.visible:
-                self.overlay.draw()
-            if self.win.visible:
-                self.win.draw(self.state, self.level_index, len(LEVELS))
+            if event.type == pygame.MOUSEMOTION:
+                if not self.overlay.visible and not self.win.visible:
+                    self.panel.handle_motion(event.pos)
 
-            pygame.display.flip()
+        # ── Update ──
+        self.city.update(dt, self.state)
+        self.panel.update(dt)
+        self.overlay.update(dt)
+
+        # ── Draw ──
+        self.screen.fill(C_BG)
+        self._draw_grid()
+        city_surf = self.city.draw()
+        self.screen.blit(city_surf, (0, HEADER_HEIGHT))
+        self.hud.draw(self.state)
+        self.panel.draw()
+        pygame.draw.line(self.screen, C_DIM,
+                         (CITY_WIDTH, HEADER_HEIGHT),
+                         (CITY_WIDTH, SCREEN_HEIGHT), 1)
+        if self.overlay.visible:
+            self.overlay.draw()
+        if self.win.visible:
+            self.win.draw(self.state, self.level_index, len(LEVELS))
+
+        pygame.display.flip()
+        return True
 
     # ──────────────────────────────────────────
     def _draw_grid(self):
