@@ -14,10 +14,10 @@ from core.draw_utils import draw_panel, draw_progress_bar, render_text_with_outl
 from core.state import GameState
 from ui.code_content_srp import CODE_BROKEN, CODE_STATS, CODE_REPO
 
-# Colores de sintaxis (neon cyberpunk). cls/fixed más brillantes para ver nombres de clase
+# Colores de sintaxis (neon cyberpunk). cls/fixed más brillantes para ver nombres de clase  # noqa: E501
 SYN = {
     "kw":      (220, 140, 255),   # purple neón
-    "cls":     (255, 255, 200),   # amarillo claro — nombres de clase bien visibles
+    "cls":     (255, 255, 200),   # amarillo claro — nombres de clase bien visibles  # noqa: E501
     "fn":      (120, 230, 255),   # cyan neón
     "st":      (160, 255, 180),   # verde neón
     "cm":      (130, 200, 220),   # comentarios visibles
@@ -349,40 +349,62 @@ class SidePanel:
                          (ox, oy + self._tab_h),
                          (ox + PANEL_WIDTH, oy + self._tab_h), 1)
 
-    def _draw_code(self, surf):
-        # Clip a la zona de código
-        code_surf = pygame.Surface((PANEL_WIDTH, self._code_h), pygame.SRCALPHA)    # noqa: E501
-        code_surf.fill((6, 13, 20, 240))
-
+    def _get_code_lines(self):
+        """Devuelve las líneas de código de la pestaña activa (para dibujo y scroll)."""
         _default = {
             "broken": CODE_BROKEN,
             "stats":  CODE_STATS,
             "repo":   CODE_REPO,
         }
         src = self._code_override or _default
-        lines = src.get(self.active_tab, [])
+        return src.get(self.active_tab, [])
+
+    def _get_code_content_height(self):
+        """Altura total en píxeles del contenido de código (para límite de scroll)."""
+        lines = self._get_code_lines()
+        lh = 22
+        return len(lines) * lh + 12  # 6 arriba + 6 abajo
+
+    def handle_wheel(self, pos, dy: int):
+        """Scroll del área de código cuando el puntero está sobre ella. dy > 0 = scroll arriba."""
+        if not self._code_rect.collidepoint(pos):
+            return
+        content_h = self._get_code_content_height()
+        max_scroll = max(0, content_h - self._code_h)
+        step = 44  # 2 líneas por vuelta
+        self._scroll_y = max(0, min(max_scroll, self._scroll_y + dy * step))
+
+    def _draw_code(self, surf):
+        lines = self._get_code_lines()
+        lh = 22
+        content_h = max(self._code_h, len(lines) * lh + 12)
+
+        # Superficie con todo el contenido (puede ser más alta que el área visible)
+        code_surf = pygame.Surface((PANEL_WIDTH, content_h), pygame.SRCALPHA)
+        code_surf.fill((6, 13, 20, 240))
 
         font_code = get_font(15, "mono", bold=False)
-        font_code_bold = get_font(15, "mono", bold=True)  # nombres de clase
+        font_code_bold = get_font(15, "mono", bold=True)
         font_ln = get_font(13, "mono")
-        lh = 22
         y = 6
 
         for i, (tokens, is_broken_line) in enumerate(lines):
-            # Número de línea (color visible pero secundario)
             ln_ts = font_ln.render(f"{i+1:2}", True, C_LINE_NUM)
             code_surf.blit(ln_ts, (4, y))
             x = 36
             for text, style in tokens:
                 color = SYN.get(style, SYN["default"])
                 font = font_code_bold if style in ("cls", "fixed") else font_code
-                render_text_with_outline(code_surf, font, text, color, (x, y),  # noqa: E501
+                render_text_with_outline(code_surf, font, text, color, (x, y),
                                          outline_color=(2, 8, 12))
                 x += font.size(text)[0]
             y += lh
 
-        surf.blit(code_surf,
-                  (CITY_WIDTH, HEADER_HEIGHT + self._mission_h + self._tab_h))
+        # Recortar y blit solo la ventana visible (deslizable)
+        dest_y = HEADER_HEIGHT + self._mission_h + self._tab_h
+        dest_rect = pygame.Rect(CITY_WIDTH, dest_y, PANEL_WIDTH, self._code_h)
+        src_rect = (0, self._scroll_y, PANEL_WIDTH, self._code_h)
+        surf.blit(code_surf, dest_rect, src_rect)
 
         # Borde inferior
         pygame.draw.line(surf, C_DIM,

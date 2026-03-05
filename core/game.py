@@ -97,6 +97,10 @@ class Game:
                 if not self.overlay.visible and not self.win.visible:
                     self.panel.handle_motion(event.pos)
 
+            if event.type == pygame.MOUSEWHEEL:
+                if not self.overlay.visible and not self.win.visible:
+                    self.panel.handle_wheel(event.pos, event.y)
+
         # ── Update ──
         self.city.update(dt, self.state)
         self.panel.update(dt)
