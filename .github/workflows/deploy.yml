@@ -34,9 +34,11 @@ jobs:
         run: pip install pygbag==0.9.2
 
       - name: Build WebAssembly
+        # Pygbag empaqueta main.py y todas las dependencias en /build/web/
         run: python -m pygbag --build --ume_block 0 --template noctx.tmpl .
 
-      - name: Copy Score Tracker
+      - name: Copy Score Tracker to build output
+        # El Score Tracker queda en la raíz; el juego en /game/
         run: |
           mkdir -p build/web/game
           cp -r build/web/* build/web/game/ 2>/dev/null || true

@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Pygbag build output
+build/
+
+# OS
+.DS_Store
+Thumbs.db
