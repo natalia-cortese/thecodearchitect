@@ -350,7 +350,7 @@ class SidePanel:
                          (ox + PANEL_WIDTH, oy + self._tab_h), 1)
 
     def _get_code_lines(self):
-        """Devuelve las líneas de código de la pestaña activa (para dibujo y scroll)."""
+        """Devuelve las líneas de código de la pestaña activa (para dibujo y scroll)."""  # noqa: E501
         _default = {
             "broken": CODE_BROKEN,
             "stats":  CODE_STATS,
@@ -360,13 +360,13 @@ class SidePanel:
         return src.get(self.active_tab, [])
 
     def _get_code_content_height(self):
-        """Altura total en píxeles del contenido de código (para límite de scroll)."""
+        """Altura total en píxeles del contenido de código (para límite de scroll)."""  # noqa: E501
         lines = self._get_code_lines()
         lh = 22
         return len(lines) * lh + 12  # 6 arriba + 6 abajo
 
     def handle_wheel(self, pos, dy: int):
-        """Scroll del área de código cuando el puntero está sobre ella. dy > 0 = scroll arriba."""
+        """Scroll del área de código cuando el puntero está sobre ella. dy > 0 = scroll arriba."""  # noqa: E501
         if not self._code_rect.collidepoint(pos):
             return
         content_h = self._get_code_content_height()
@@ -379,7 +379,7 @@ class SidePanel:
         lh = 22
         content_h = max(self._code_h, len(lines) * lh + 12)
 
-        # Superficie con todo el contenido (puede ser más alta que el área visible)
+        # Superficie con todo el contenido (puede ser más alta que el área visible)  # noqa: E501
         code_surf = pygame.Surface((PANEL_WIDTH, content_h), pygame.SRCALPHA)
         code_surf.fill((6, 13, 20, 240))
 
@@ -394,7 +394,7 @@ class SidePanel:
             x = 36
             for text, style in tokens:
                 color = SYN.get(style, SYN["default"])
-                font = font_code_bold if style in ("cls", "fixed") else font_code
+                font = font_code_bold if style in ("cls", "fixed") else font_code  # noqa: E501
                 render_text_with_outline(code_surf, font, text, color, (x, y),
                                          outline_color=(2, 8, 12))
                 x += font.size(text)[0]
