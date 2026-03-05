@@ -8,7 +8,7 @@ import math
 import random
 from core.constants import *
 from core.fonts import get_font
-from core.draw_utils import draw_glow_circle, draw_arrow_line
+from core.draw_utils import draw_glow_circle, draw_arrow_line, render_text_with_outline
 from core.state import GameState
 
 
@@ -133,13 +133,19 @@ class ClassNode:
         pygame.draw.circle(surf, C_CODE_BG, (self.x, self.y), self.radius)
         pygame.draw.circle(surf, self.color,  (self.x, self.y), self.radius, 2)
 
-        # Label
-        font = get_font(10, "mono", bold=True)
+        # Label: texto blanco sobre el círculo oscuro para que el nombre se lea bien
+        font = get_font(13, "mono", bold=True)
+        text_color = (255, 255, 255)
         words = self.label.split()
         for i, word in enumerate(words):
-            ts = font.render(word, True, self.color)
-            r  = ts.get_rect(center=(self.x, self.y - 6 + i * 14))
-            surf.blit(ts, r)
+            dy = -6 + i * 16
+            tw = font.size(word)[0]
+            th = font.get_height()
+            cx = self.x
+            cy = self.y + dy
+            render_text_with_outline(surf, font, word, text_color,
+                                     (cx - tw // 2, cy - th // 2),
+                                     outline_color=(2, 6, 10))
 
 
 class CityView:
@@ -255,23 +261,37 @@ class CityView:
         return surf
 
     def _draw_context_labels(self, surf: pygame.Surface):
-        font = get_font(11, "mono")
+        font = get_font(14, "mono", bold=True)
         if self._step == STEP_CHAOS:
             lines = ["⚠ CLASE SOBRECARGADA", "Demasiadas responsabilidades"]
             color = C_DANGER
-            y = self.node_video.y - self.node_video.radius - 50
+            y = self.node_video.y - self.node_video.radius - 52
         elif self._step >= STEP_DONE:
             lines = ["✅ ARQUITECTURA LIMPIA", "Responsabilidades separadas"]
             color = C_SUCCESS
-            y = 30
+            y = 28
         else:
             return
 
+        # Fondo semiópaco para que el texto se lea sobre cables y fondo
+        line_height = 22
+        max_w = max(font.size(l)[0] for l in lines)
+        pad_x, pad_y = 20, 12
+        box_w = max_w + pad_x * 2
+        box_h = len(lines) * line_height + pad_y * 2
+        box_x = (self.width - box_w) // 2
+        box_y = y - pad_y
+        panel = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
+        panel.fill((8, 18, 28, 230))
+        pygame.draw.rect(panel, (*color[:3], 120), panel.get_rect(), 2)
+        surf.blit(panel, (box_x, box_y))
+
         for line in lines:
             ts = font.render(line, True, color)
-            r  = ts.get_rect(centerx=self.width // 2, y=y)
-            surf.blit(ts, r)
-            y += 18
+            rx = (self.width - ts.get_width()) // 2
+            render_text_with_outline(surf, font, line, color, (rx, y),
+                                     outline_color=(5, 10, 15))
+            y += line_height
 
     # Propiedades sincronizadas vía update()
     _state_broken = False

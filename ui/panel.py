@@ -14,16 +14,16 @@ from core.draw_utils import draw_panel, draw_progress_bar, render_text_with_outl
 from core.state import GameState
 from ui.code_content_srp import CODE_BROKEN, CODE_STATS, CODE_REPO
 
-# Colores de sintaxis (neon cyberpunk, alta legibilidad sobre fondo oscuro)
+# Colores de sintaxis (neon cyberpunk). cls/fixed más brillantes para ver nombres de clase
 SYN = {
     "kw":      (220, 140, 255),   # purple neón
-    "cls":     (255, 230, 100),   # amarillo neón
+    "cls":     (255, 255, 200),   # amarillo claro — nombres de clase bien visibles
     "fn":      (120, 230, 255),   # cyan neón
     "st":      (160, 255, 180),   # verde neón
     "cm":      (130, 200, 220),   # comentarios visibles
     "num":     (255, 180, 100),   # naranja neón
     "broken":  C_DANGER,
-    "fixed":   C_SUCCESS,
+    "fixed":   (120, 255, 180),   # verde más brillante — clases refactorizadas
     "default": C_CODE_TEXT,
 }
 
@@ -363,6 +363,7 @@ class SidePanel:
         lines = src.get(self.active_tab, [])
 
         font_code = get_font(15, "mono", bold=False)
+        font_code_bold = get_font(15, "mono", bold=True)  # nombres de clase
         font_ln = get_font(13, "mono")
         lh = 22
         y = 6
@@ -374,9 +375,10 @@ class SidePanel:
             x = 36
             for text, style in tokens:
                 color = SYN.get(style, SYN["default"])
-                render_text_with_outline(code_surf, font_code, text, color, (x, y),  # noqa: E501
+                font = font_code_bold if style in ("cls", "fixed") else font_code
+                render_text_with_outline(code_surf, font, text, color, (x, y),  # noqa: E501
                                          outline_color=(2, 8, 12))
-                x += font_code.size(text)[0]
+                x += font.size(text)[0]
             y += lh
 
         surf.blit(code_surf,
