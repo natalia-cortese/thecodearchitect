@@ -69,7 +69,7 @@ class Button:
         pygame.draw.rect(surf, color,
                          pygame.Rect(self.rect.x, self.rect.y, 3, bar_h))
 
-        font = get_font(12, "body", bold=False)
+        font = get_font(14, "body", bold=False)
         ts = font.render(self.text, True, color if self.enabled else C_DIM)
         surf.blit(ts, (self.rect.x + 10, self.rect.y + (self.rect.height - ts.get_height()) // 2))  # noqa: E501
 
@@ -97,8 +97,8 @@ class SidePanel:
         # ── Secciones ──
         self._rect_full = pygame.Rect(ox, oy, pw, CITY_HEIGHT)
 
-        # Misión: parte superior fija
-        self._mission_h = 140
+        # Misión: parte superior fija (altura mayor para texto más legible)
+        self._mission_h = 170
         self._mission_rect = pygame.Rect(ox, oy, pw, self._mission_h)
 
         # Pestañas de código
@@ -241,21 +241,21 @@ class SidePanel:
         self._draw_actions(s)
 
     def _draw_mission(self, surf, ox, oy):
-        font_title = get_font(9,  "mono", bold=True)
-        font_tag = get_font(9,  "mono")
-        font_body = get_font(12, "body")
+        font_title = get_font(12, "mono", bold=True)
+        font_tag = get_font(11, "mono")
+        font_body = get_font(14, "body")
 
         # Etiqueta SRP
         tag = font_tag.render("PRINCIPIO  S.R.P.", True, C_ACCENT)
         surf.blit(tag, (ox + 14, oy + 10))
         pygame.draw.rect(surf, C_ACCENT,
-                         pygame.Rect(ox + 10, oy + 8, tag.get_width() + 8, 18), 1)  # noqa: E501
+                         pygame.Rect(ox + 10, oy + 8, tag.get_width() + 8, 22), 1)  # noqa: E501
 
         # Título sección
         title = font_title.render("MISIÓN ACTUAL", True, C_CYAN)
-        surf.blit(title, (ox + 14, oy + 32))
+        surf.blit(title, (ox + 14, oy + 36))
         pygame.draw.line(surf, C_DIM,
-                         (ox + 10, oy + 47), (ox + PANEL_WIDTH - 10, oy + 47), 1)  # noqa: E501
+                         (ox + 10, oy + 54), (ox + PANEL_WIDTH - 10, oy + 54), 1)  # noqa: E501
 
         # Texto de misión según paso
         st = self.state
@@ -299,23 +299,21 @@ class SidePanel:
                      "La ciudad está estabilizada."]
             body_color = C_SUCCESS
 
-        y = oy + 52
+        y = oy + 60
+        line_height = 18
         for line in lines:
             if line:
                 ts = font_body.render(line, True, body_color)
                 surf.blit(ts, (ox + 14, y))
-            y += 14
+            y += line_height
 
         # Barra de progreso
-        pr_rect = pygame.Rect(ox + 14, oy + self._mission_h - 22,
-                              PANEL_WIDTH - 28, 6)
+        pr_rect = pygame.Rect(ox + 14, oy + self._mission_h - 26,
+                              PANEL_WIDTH - 28, 8)
         draw_progress_bar(surf, pr_rect, self.state.progress_pct, C_SUCCESS)
         pct_label = font_tag.render(f"PROGRESO  {int(self.state.progress_pct*100)}%",  # noqa: E501
-                                    True, (C_TEXT[0], C_TEXT[1], C_TEXT[2]))
-        pls = pygame.Surface(pct_label.get_size(), pygame.SRCALPHA)
-        pls.blit(pct_label, (0, 0))
-        pls.set_alpha(100)
-        surf.blit(pls, (ox + 14, oy + self._mission_h - 36))
+                                    True, C_TEXT)
+        surf.blit(pct_label, (ox + 14, oy + self._mission_h - 42))
 
         pygame.draw.line(surf, C_DIM,
                          (ox, oy + self._mission_h - 1),
@@ -325,7 +323,7 @@ class SidePanel:
         tab_w = PANEL_WIDTH // len(self._tabs)
         oy = HEADER_HEIGHT + self._mission_h
         ox = CITY_WIDTH
-        font = get_font(10, "mono")
+        font = get_font(11, "mono")
 
         for i, tab in enumerate(self._tabs):
             tx = ox + i * tab_w
@@ -364,9 +362,9 @@ class SidePanel:
         src = self._code_override or _default
         lines = src.get(self.active_tab, [])
 
-        font_code = get_font(14, "mono", bold=True)
-        font_ln = get_font(12, "mono")
-        lh = 20
+        font_code = get_font(15, "mono", bold=False)
+        font_ln = get_font(13, "mono")
+        lh = 22
         y = 6
 
         for i, (tokens, is_broken_line) in enumerate(lines):
@@ -391,7 +389,7 @@ class SidePanel:
 
     def _draw_actions(self, surf):
         ay = self._action_y
-        font = get_font(9, "mono", bold=True)
+        font = get_font(12, "mono", bold=True)
 
         title_ts = font.render("⚡  HERRAMIENTAS DE REFACTORIZACIÓN", True, C_ACCENT)  # noqa: E501
         surf.blit(title_ts, (CITY_WIDTH + 10, ay + 8))
