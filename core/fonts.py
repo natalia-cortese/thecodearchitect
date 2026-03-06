@@ -11,7 +11,16 @@ pygame.font.init()
 # Fuentes monoespaciadas disponibles en el sistema
 _MONO_CANDIDATES   = ["Courier New", "Courier", "DejaVu Sans Mono", "monospace"]
 _TITLE_CANDIDATES  = ["Impact", "Arial Black", "DejaVu Sans", "sans-serif"]
-_BODY_CANDIDATES   = ["Arial", "DejaVu Sans", "sans-serif"]
+# Body: fuentes pensadas para legibilidad en pantalla (Verdana, Segoe UI, etc.)
+_BODY_CANDIDATES   = [
+    "Verdana",        # diseñada para pantalla, muy legible
+    "Segoe UI",       # clara en Windows
+    "Tahoma",         # buena legibilidad
+    "Helvetica",      # estándar en macOS
+    "Arial",
+    "DejaVu Sans",
+    "sans-serif",
+]
 
 
 def _find_font(candidates: list[str]) -> str:

@@ -107,7 +107,7 @@ make clean   # borra el venv
 ### Opción C — Manual
 
 ```bash
-git clone https://github.com/tu-usuario/code-architect.git
+git clone https://github.com/natalia-cortese/code-architect.git
 cd code-architect
 
 python3 -m venv venv
@@ -213,33 +213,3 @@ MIT — libre para usar, modificar y distribuir con atribución.
 Creado con ❤️ para enseñar programación de forma divertida.
 
 *"El código limpio no se escribe, se refactoriza."*
-
----
-
-## 🌐 Score Tracker (GitHub Pages)
-
-El archivo `index.html` en la raíz es el **Score Tracker** — una web app que acompaña el juego:
-
-- Ingreso de usuario con nombre
-- Registro de puntajes por nivel SOLID
-- Leaderboard local (persiste en el navegador)
-- Leaderboard online opcional vía [JSONBin](https://jsonbin.io)
-
-### Activar leaderboard compartido
-
-Editá estas dos líneas en `index.html`:
-
-```javascript
-const JSONBIN_ID  = "tu-bin-id";
-const JSONBIN_KEY = "$2a$10$tu-key";
-```
-
-1. Crear cuenta gratis en https://jsonbin.io
-2. Crear un bin con contenido inicial `{}`
-3. Copiar el ID y la Access Key
-
-### Deploy en GitHub Pages
-
-Settings → Pages → Branch: `main` / `/ (root)` → Save
-
-URL: `https://<tu-usuario>.github.io/<tu-repo>/`
