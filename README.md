@@ -83,14 +83,14 @@ Aplicar la herramienta de **refactorización** para separar en:
 
 **Linux / macOS:**
 ```bash
-git clone https://github.com/tu-usuario/code-architect.git
+git clone https://github.com/natalia-cortese/code-architect.git
 cd code-architect
 chmod +x setup.sh && ./setup.sh
 ```
 
 **Windows:**
 ```bat
-git clone https://github.com/tu-usuario/code-architect.git
+git clone https://github.com/natalia-cortese/code-architect.git
 cd code-architect
 setup.bat
 ```
@@ -185,6 +185,10 @@ code_architect/
 - Cualquiera que quiera entender SOLID de forma práctica
 
 ---
+
+## Hora de Jugar
+
+https://natalia-cortese.github.io/thecodearchitect/game/
 
 ## 🤝 Contribuir
 
