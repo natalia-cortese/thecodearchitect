@@ -5,7 +5,7 @@ Panel lateral derecho — pestañas de código + botones de acción.
 import pygame
 from core.constants import (
     C_DANGER, C_SUCCESS, C_TEXT, C_CYAN, C_DIM, C_ACCENT, C_PANEL,
-    C_CODE_TEXT, C_LINE_NUM,
+    C_CODE_TEXT, C_LINE_NUM, C_BLACK, C_WHITE,
     CITY_WIDTH, HEADER_HEIGHT, PANEL_WIDTH, CITY_HEIGHT, STEP_CHAOS,
     STEP_STATS, STEP_REPO, SCREEN_WIDTH
 )
@@ -14,25 +14,47 @@ from core.draw_utils import draw_panel, draw_progress_bar, render_text_with_outl
 from core.state import GameState
 from ui.code_content_srp import CODE_BROKEN, CODE_STATS, CODE_REPO
 
-# Colores de sintaxis (neon cyberpunk). cls/fixed más brillantes para ver nombres de clase  # noqa: E501
+# Colores de sintaxis y pestañas del panel de código
 SYN = {
-    "kw":      (220, 140, 255),   # purple neón
-    "cls":     (255, 255, 200),   # amarillo claro — nombres de clase bien visibles  # noqa: E501
-    "fn":      (120, 230, 255),   # cyan neón
-    "st":      (160, 255, 180),   # verde neón
-    "cm":      (130, 200, 220),   # comentarios visibles
-    "num":     (255, 180, 100),   # naranja neón
-    "broken":  C_DANGER,
-    "fixed":   (120, 255, 180),   # verde más brillante — clases refactorizadas
+    "kw": (220, 140, 255),
+    "cls": (255, 255, 200),
+    "fn": (120, 230, 255),
+    "st": (160, 255, 180),
+    "cm": (130, 200, 220),
+    "num": (255, 180, 100),
+    "broken": C_DANGER,
+    "fixed": (120, 255, 180),
     "default": C_CODE_TEXT,
 }
-
 TABS = ["broken", "stats", "repo"]
 TAB_LABELS = {
     "broken": "video.py ⚠",
-    "stats":  "video_stats.py",
-    "repo":   "video_repo.py",
+    "stats": "video_stats.py",
+    "repo": "video_repo.py",
 }
+
+# Zona fija para barra de progreso (evita que tape el texto de misión)
+PROGRESS_BAND_H = 50
+
+
+def _wrap_text(font: pygame.font.Font, text: str, max_width: int) -> list[str]:
+    """Ajusta el texto al ancho máximo; devuelve lista de líneas."""
+    if not text.strip():
+        return []
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip() if current else word
+        if font.size(candidate)[0] <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
 
 
 class Button:
@@ -97,21 +119,22 @@ class SidePanel:
         # ── Secciones ──
         self._rect_full = pygame.Rect(ox, oy, pw, CITY_HEIGHT)
 
-        # Misión: parte superior fija (altura mayor para texto más legible)
-        self._mission_h = 170
+        # Misión: parte superior fija; banda inferior reservada para progreso
+        self._mission_h = 185
         self._mission_rect = pygame.Rect(ox, oy, pw, self._mission_h)
 
         # Pestañas de código
         self._tab_h = 28
         self._tab_rect = pygame.Rect(ox, oy + self._mission_h, pw, self._tab_h)
 
-        # Área de código (scrollable)
-        self._code_h = CITY_HEIGHT - self._mission_h - self._tab_h - 170
+        # Área de código (scrollable); 200 px reservados para botones
+        self._action_band_h = 200
+        self._code_h = CITY_HEIGHT - self._mission_h - self._tab_h - self._action_band_h
         self._code_rect = pygame.Rect(ox, oy + self._mission_h + self._tab_h, pw, self._code_h)  # noqa: E501
 
-        # Acciones
+        # Acciones (botones)
         self._action_y = oy + self._mission_h + self._tab_h + self._code_h
-        self._action_h = CITY_HEIGHT - self._mission_h - self._tab_h - self._code_h   # noqa: E501
+        self._action_h = self._action_band_h
 
         # Configuración dinámica — puede ser sobreescrita por configure()
         self._tabs = list(TABS)
@@ -211,8 +234,13 @@ class SidePanel:
                 self.set_tab(self._tabs[idx])
             return
 
-        # Scroll en área de código
+        # Clic en área de código: scroll proporcional (para ver todo el código)
         if self._code_rect.collidepoint(pos):
+            content_h = self._get_code_content_height()
+            if content_h > self._code_h:
+                rel_y = (pos[1] - self._code_rect.y) / self._code_rect.h
+                self._scroll_y = int(rel_y * (content_h - self._code_h))
+                self._scroll_y = max(0, min(content_h - self._code_h, self._scroll_y))  # noqa: E501
             return
 
         # Botones
@@ -241,80 +269,94 @@ class SidePanel:
         self._draw_actions(s)
 
     def _draw_mission(self, surf, ox, oy):
-        font_title = get_font(12, "mono", bold=True)
         font_tag = get_font(11, "mono")
-        font_body = get_font(14, "body")
+        font_body = get_font(12, "verdana")
 
         # Etiqueta SRP
-        tag = font_tag.render("PRINCIPIO  S.R.P.", True, C_ACCENT)
+        # Mostrar el nombre del principio/nivel, usando un font más grande y generado según el nivel. # noqa: E501
+        level_name = getattr(self.state, "level_name", "PRINCIPIO S.R.P.")  # o equiv. # noqa: E501
+        font_level = get_font(20, "mono", bold=True)
+        tag = font_level.render(level_name, True, C_ACCENT)
         surf.blit(tag, (ox + 14, oy + 10))
         pygame.draw.rect(surf, C_ACCENT,
                          pygame.Rect(ox + 10, oy + 8, tag.get_width() + 8, 22), 1)  # noqa: E501
 
         # Título sección
-        title = font_title.render("MISIÓN ACTUAL", True, C_CYAN)
+        level_title = getattr(self.state, "level_title", "MISIÓN ACTUAL")
+        font_title = get_font(16, "mono", bold=False)
+        title = font_title.render(level_title, True, C_CYAN)
         surf.blit(title, (ox + 14, oy + 36))
         pygame.draw.line(surf, C_DIM,
                          (ox + 10, oy + 54), (ox + PANEL_WIDTH - 10, oy + 54), 1)  # noqa: E501
 
-        # Texto de misión según paso
+        # Texto de misión según paso (párrafos para envolver)
         st = self.state
         if st.step == STEP_CHAOS and not st.broken:
-            lines = [
-                "La clase Video intenta hacer DOS",
-                "cosas: calcular estadísticas Y guardar",
-                "en la base de datos.",
+            raw = [
+                "La clase Video intenta hacer DOS cosas: calcular estadísticas "  # noqa: E501
+                "Y guardar en la base de datos.",
                 "",
-                "Usá la herramienta de refactorización",
-                "para separar responsabilidades.",
+                "Usá la herramienta de refactorización para separar "
+                "responsabilidades.",
             ]
             body_color = C_TEXT
         elif st.broken:
-            lines = [
-                "¡La base de datos se rompió al",
-                "actualizar el cálculo! Ambas",
+            raw = [
+                "¡La base de datos se rompió al actualizar el cálculo! Ambas "
                 "responsabilidades están acopladas.",
                 "",
                 "Separalas para estabilizar el sistema.",
             ]
             body_color = C_DANGER
         elif st.step == STEP_STATS:
-            lines = [
-                "VideoStats creada ✅",
-                "Ahora extraé VideoRepository",
-                "para separar la persistencia",
-                "de la lógica de cálculo.",
+            raw = [
+                "VideoStats creada ✅ Ahora extraé VideoRepository para "
+                "separar la persistencia de la lógica de cálculo.",
             ]
             body_color = C_TEXT
         elif st.step == STEP_REPO:
-            lines = [
-                "VideoRepository creada ✅",
-                "Ambas clases independientes.",
-                "¡Conectalas para completar",
-                "el refactoring!",
+            raw = [
+                "VideoRepository creada ✅ Ambas clases independientes. "
+                "¡Conectalas para completar el refactoring!",
             ]
             body_color = C_TEXT
         else:
-            lines = ["✅ ¡Refactorización completa!",
-                     "La ciudad está estabilizada."]
+            raw = [
+                "✅ ¡Refactorización completa! La ciudad está estabilizada.",
+            ]
             body_color = C_SUCCESS
 
-        y = oy + 60
+        max_text_w = PANEL_WIDTH - 28
+        lines = []
+        for block in raw:
+            if block:
+                lines.extend(_wrap_text(font_body, block, max_text_w))
+            else:
+                lines.append("")
+
+        # Zona de texto: arriba de la banda de progreso (no solapa)
+        body_top = oy + 60
+        body_bottom = oy + self._mission_h - PROGRESS_BAND_H
         line_height = 18
+        y = body_top
+        clip_rect = pygame.Rect(ox, body_top, PANEL_WIDTH, body_bottom - body_top)  # noqa: E501
+        surf.set_clip(clip_rect)
         for line in lines:
-            if line:
-                ts = font_body.render(line, True, body_color)
-                surf.blit(ts, (ox + 14, y))
-            y += line_height
+            if y + line_height <= body_bottom:
+                if line:
+                    ts = font_body.render(line, True, body_color)
+                    surf.blit(ts, (ox + 14, y))
+                y += line_height
+        surf.set_clip(None)
 
-        # Barra de progreso
-        pr_rect = pygame.Rect(ox + 14, oy + self._mission_h - 26,
-                              PANEL_WIDTH - 28, 8)
+        # Banda de progreso fija abajo (siempre visible, no tapa texto)
+        prog_y = oy + self._mission_h - PROGRESS_BAND_H
+        pct_label = font_tag.render(
+            f"PROGRESO  {int(self.state.progress_pct*100)}%", True, C_TEXT
+        )
+        surf.blit(pct_label, (ox + 14, prog_y + 8))
+        pr_rect = pygame.Rect(ox + 14, prog_y + 28, PANEL_WIDTH - 28, 8)
         draw_progress_bar(surf, pr_rect, self.state.progress_pct, C_SUCCESS)
-        pct_label = font_tag.render(f"PROGRESO  {int(self.state.progress_pct*100)}%",  # noqa: E501
-                                    True, C_TEXT)
-        surf.blit(pct_label, (ox + 14, oy + self._mission_h - 42))
-
         pygame.draw.line(surf, C_DIM,
                          (ox, oy + self._mission_h - 1),
                          (ox + PANEL_WIDTH, oy + self._mission_h - 1), 1)
@@ -336,9 +378,9 @@ class SidePanel:
                 pygame.draw.line(surf, C_CYAN,
                                  (tx, oy + self._tab_h - 2),
                                  (tx + tab_w, oy + self._tab_h - 2), 2)
-                color = C_CYAN
+                color = C_BLACK  # texto legible sobre fondo cyan
             else:
-                color = C_DIM
+                color = C_WHITE  # pestaña no seleccionada: color normal, letras blancas
 
             label = self._tab_labels.get(tab, tab)
             ts = font.render(label, True, color)
@@ -371,7 +413,7 @@ class SidePanel:
             return
         content_h = self._get_code_content_height()
         max_scroll = max(0, content_h - self._code_h)
-        step = 44  # 2 líneas por vuelta
+        step = 22  # 1 línea por vuelta de rueda
         self._scroll_y = max(0, min(max_scroll, self._scroll_y + dy * step))
 
     def _draw_code(self, surf):
@@ -405,6 +447,20 @@ class SidePanel:
         dest_rect = pygame.Rect(CITY_WIDTH, dest_y, PANEL_WIDTH, self._code_h)
         src_rect = (0, self._scroll_y, PANEL_WIDTH, self._code_h)
         surf.blit(code_surf, dest_rect, src_rect)
+
+        # Barra de scroll visible cuando el contenido es más alto que el área
+        if content_h > self._code_h:
+            sb_x = CITY_WIDTH + PANEL_WIDTH - 10
+            sb_y = dest_y
+            track_rect = pygame.Rect(sb_x, sb_y, 6, self._code_h)
+            pygame.draw.rect(surf, C_DIM, track_rect, border_radius=3)
+            visible_ratio = self._code_h / content_h
+            thumb_h = max(24, int(self._code_h * visible_ratio))
+            max_scroll = content_h - self._code_h
+            thumb_y = sb_y + int((self._code_h - thumb_h) * self._scroll_y
+                                 / max_scroll) if max_scroll > 0 else sb_y
+            thumb_rect = pygame.Rect(sb_x + 1, thumb_y, 4, thumb_h)
+            pygame.draw.rect(surf, C_CYAN, thumb_rect, border_radius=2)
 
         # Borde inferior
         pygame.draw.line(surf, C_DIM,
