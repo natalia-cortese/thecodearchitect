@@ -180,6 +180,17 @@ class OCPLevel(BaseLevel):
         elif action == "extend":
             self._add_extension()
 
+    def update_panel_buttons(self, state):
+        st = state
+        self.panel.buttons[0].enabled = not st.broken
+        self.panel.buttons[1].enabled = not st.interface_created
+        self.panel.buttons[2].enabled = (
+            st.interface_created and not st.calculator_clean
+        )
+        self.panel.buttons[3].enabled = (
+            st.calculator_clean and not st.extension_added
+        )
+
     # ── Acciones ──────────────────────────────
 
     def _simulate_break(self):

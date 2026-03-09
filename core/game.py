@@ -104,6 +104,7 @@ class Game:
         # ── Update ──
         self.city.update(dt, self.state)
         self.panel.update(dt)
+        self.level.update_panel_buttons(self.state)
         self.overlay.update(dt)
 
         # ── Draw ──

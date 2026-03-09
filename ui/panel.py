@@ -207,23 +207,8 @@ class SidePanel:
             self._scroll_y = 0
 
     def update(self, dt: float):  # noqa: ARG001
-        """Sincroniza enabled de botones con el estado del nivel activo."""
-        st = self.state
-        # Nivel 1 (SRP): usa stats_created / repo_created
-        srp_level = (
-            hasattr(st, 'stats_created')
-            and not hasattr(st, 'interface_created')
-        )
-        if srp_level:
-            self.buttons[0].enabled = not st.broken
-            self.buttons[1].enabled = not st.stats_created
-            self.buttons[2].enabled = (
-                st.stats_created and not st.repo_created
-            )
-            self.buttons[3].enabled = (
-                st.stats_created and st.repo_created
-            )
-        # Nivel 2 (OCP): botones gestionados por OCPLevel directamente
+        """Actualización por frame. El estado de los botones lo sincroniza el nivel."""
+        pass
 
     def handle_click(self, pos):
         # Pestañas

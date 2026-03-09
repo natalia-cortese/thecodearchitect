@@ -28,3 +28,8 @@ class BaseLevel:
     def handle_action(self, action: str) -> None:
         """Recibe los action IDs que disparan los botones del panel."""
         raise NotImplementedError
+
+    def update_panel_buttons(self, state: "GameState") -> None:
+        """Sincroniza el estado enabled de los botones con el estado del nivel."""
+        pass
+

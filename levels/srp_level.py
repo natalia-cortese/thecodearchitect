@@ -57,6 +57,13 @@ class SRPLevel(BaseLevel):
         elif action == "finish":
             self._finish_refactor()
 
+    def update_panel_buttons(self, state):
+        st = state
+        self.panel.buttons[0].enabled = not st.broken
+        self.panel.buttons[1].enabled = not st.stats_created
+        self.panel.buttons[2].enabled = st.stats_created and not st.repo_created
+        self.panel.buttons[3].enabled = st.stats_created and st.repo_created
+
     # ── Acciones ──────────────────────────────
 
     def _simulate_break(self):
