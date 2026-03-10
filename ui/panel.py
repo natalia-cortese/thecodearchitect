@@ -129,7 +129,7 @@ class SidePanel:
 
         # Área de código (scrollable); 200 px reservados para botones
         self._action_band_h = 200
-        self._code_h = CITY_HEIGHT - self._mission_h - self._tab_h - self._action_band_h
+        self._code_h = CITY_HEIGHT - self._mission_h - self._tab_h - self._action_band_h  # noqa: E501
         self._code_rect = pygame.Rect(ox, oy + self._mission_h + self._tab_h, pw, self._code_h)  # noqa: E501
 
         # Acciones (botones)
@@ -207,7 +207,7 @@ class SidePanel:
             self._scroll_y = 0
 
     def update(self, dt: float):  # noqa: ARG001
-        """Actualización por frame. El estado de los botones lo sincroniza el nivel."""
+        """Actualización por frame. El estado de los botones lo sincroniza el nivel."""  # noqa: E501
         pass
 
     def handle_click(self, pos):
@@ -365,7 +365,7 @@ class SidePanel:
                                  (tx + tab_w, oy + self._tab_h - 2), 2)
                 color = C_BLACK  # texto legible sobre fondo cyan
             else:
-                color = C_WHITE  # pestaña no seleccionada: color normal, letras blancas
+                color = C_WHITE  # pestaña no seleccionada: color normal, letras blancas  # noqa: E501 
 
             label = self._tab_labels.get(tab, tab)
             ts = font.render(label, True, color)
