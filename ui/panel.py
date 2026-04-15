@@ -5,7 +5,7 @@ Panel lateral derecho — pestañas de código + botones de acción.
 import pygame
 from core.constants import (
     C_DANGER, C_SUCCESS, C_TEXT, C_CYAN, C_DIM, C_ACCENT, C_PANEL,
-    C_CODE_TEXT, C_LINE_NUM, C_BLACK, C_WHITE,
+    C_LINE_NUM, C_BLACK, C_WHITE,
     CITY_WIDTH, HEADER_HEIGHT, PANEL_WIDTH, CITY_HEIGHT, STEP_CHAOS,
     STEP_STATS, STEP_REPO, SCREEN_WIDTH
 )
@@ -13,25 +13,7 @@ from core.fonts import get_font
 from core.draw_utils import draw_panel, draw_progress_bar, render_text_with_outline  # noqa: E501
 from core.state import GameState
 from ui.code_content_srp import CODE_BROKEN, CODE_STATS, CODE_REPO
-
-# Colores de sintaxis y pestañas del panel de código
-SYN = {
-    "kw": (220, 140, 255),
-    "cls": (255, 255, 200),
-    "fn": (120, 230, 255),
-    "st": (160, 255, 180),
-    "cm": (130, 200, 220),
-    "num": (255, 180, 100),
-    "broken": C_DANGER,
-    "fixed": (120, 255, 180),
-    "default": C_CODE_TEXT,
-}
-TABS = ["broken", "stats", "repo"]
-TAB_LABELS = {
-    "broken": "video.py ⚠",
-    "stats": "video_stats.py",
-    "repo": "video_repo.py",
-}
+from ui.styles.panel_styles import SYN, TABS, TAB_LABELS
 
 # Zona fija para barra de progreso (evita que tape el texto de misión)
 PROGRESS_BAND_H = 50
@@ -255,7 +237,7 @@ class SidePanel:
 
     def _draw_mission(self, surf, ox, oy):
         font_tag = get_font(11, "mono")
-        font_body = get_font(12, "verdana")
+        font_body = get_font(12, "body")
 
         # Etiqueta SRP
         # Mostrar el nombre del principio/nivel, usando un font más grande y generado según el nivel. # noqa: E501
