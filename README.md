@@ -24,7 +24,7 @@ Cada nivel enseña uno de los cinco principios SOLID usando mecánicas de juego,
 | 1 | **S** — Single Responsibility (SRP) | ✅ Disponible |
 | 2 | **O** — Open/Closed (OCP) | ✅ Disponible |
 | 3 | **L** — Liskov Substitution (LSP) | ✅ Disponible |
-| 4 | **I** — Interface Segregation (ISP) | 🔜 Planeado |
+| 4 | **I** — Interface Segregation (ISP) | ✅ Disponible |
 | 5 | **D** — Dependency Inversion (DIP) | 🔜 Planeado |
 
 ---
