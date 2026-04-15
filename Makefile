@@ -1,7 +1,7 @@
 # Makefile — Comandos de conveniencia para The Code Architect
 # Uso: make <comando>
 
-.PHONY: setup run srp clean help
+.PHONY: setup run srp clean help test test-cov lint
 
 VENV      = venv
 PYTHON    = $(VENV)/bin/python
@@ -41,7 +41,19 @@ run: $(VENV)/bin/activate
 srp: $(VENV)/bin/activate
 	$(PYTHON) levels/srp_example.py
 
+## test: Ejecuta los tests
+test: $(VENV)/bin/activate
+	$(PYTHON) -m pytest tests/ -v
+
+## test-cov: Ejecuta tests con coverage
+test-cov: $(VENV)/bin/activate
+	$(PYTHON) -m pytest tests/ -v --cov=. --cov-report=term-missing
+
+## lint: Ejecuta linter flake8
+lint: $(VENV)/bin/activate
+	$(PYTHON) -m flake8 . --count --max-line-length=120 --statistics
+
 ## clean: Elimina el entorno virtual y archivos temporales
 clean:
-	rm -rf $(VENV) __pycache__ */__pycache__ *.pyc */*.pyc
+	rm -rf $(VENV) __pycache__ */__pycache__ *.pyc */*.pyc .pytest_cache .coverage
 	@echo "🧹 Limpieza completa."
