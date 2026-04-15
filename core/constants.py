@@ -47,6 +47,11 @@ STEP_STATS = 1  # VideoStats extraída
 STEP_REPO = 2  # VideoRepository extraída
 STEP_DONE = 3  # refactorización completa
 
+# Pasos LSP
+LSP_STEP_CHAOS    = 0
+LSP_STEP_SEPARATE = 1
+LSP_STEP_REFACTOR = 2
+
 # Puntuación
 SCORE_BREAK = 0
 SCORE_STATS = 200

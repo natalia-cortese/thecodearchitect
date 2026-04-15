@@ -13,8 +13,9 @@ from ui.win_screen import WinScreen
 from levels.city_view import CityView
 from levels.srp_level import SRPLevel
 from levels.ocp_level import OCPLevel
+from levels.lsp_level import LSPLevel
 
-LEVELS = [SRPLevel, OCPLevel]
+LEVELS = [SRPLevel, OCPLevel, LSPLevel]
 
 
 class Game:
