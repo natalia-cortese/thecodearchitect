@@ -14,8 +14,9 @@ from levels.city_view import CityView
 from levels.srp_level import SRPLevel
 from levels.ocp_level import OCPLevel
 from levels.lsp_level import LSPLevel
+from levels.isp_level import ISPLevel
 
-LEVELS = [SRPLevel, OCPLevel, LSPLevel]
+LEVELS = [SRPLevel, OCPLevel, LSPLevel, ISPLevel]
 
 
 class Game:
