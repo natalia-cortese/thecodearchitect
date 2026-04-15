@@ -22,8 +22,8 @@ Cada nivel enseña uno de los cinco principios SOLID usando mecánicas de juego,
 | # | Principio | Estado |
 |---|-----------|--------|
 | 1 | **S** — Single Responsibility (SRP) | ✅ Disponible |
-| 2 | **O** — Open/Closed (OCP) | 🔜 En desarrollo |
-| 3 | **L** — Liskov Substitution (LSP) | 🔜 Planeado |
+| 2 | **O** — Open/Closed (OCP) | ✅ Disponible |
+| 3 | **L** — Liskov Substitution (LSP) | ✅ Disponible |
 | 4 | **I** — Interface Segregation (ISP) | 🔜 Planeado |
 | 5 | **D** — Dependency Inversion (DIP) | 🔜 Planeado |
 
@@ -98,10 +98,13 @@ setup.bat
 ### Opción B — Make
 
 ```bash
-make setup   # crea venv + instala dependencias
-make run     # inicia el juego
-make srp     # corre el ejemplo SRP en terminal (sin pygame)
-make clean   # borra el venv
+make setup      # crea venv + instala dependencias
+make run        # inicia el juego
+make srp        # corre el ejemplo SRP en terminal (sin pygame)
+make test       # ejecuta los tests
+make test-cov   # ejecuta tests con coverage
+make lint       # ejecuta linter flake8
+make clean      # borra el venv
 ```
 
 ### Opción C — Manual
@@ -124,6 +127,46 @@ python main.py
 source venv/bin/activate
 python levels/srp_example.py
 ```
+
+---
+
+## 🧪 Testing
+
+El proyecto usa **pytest** para tests y **pytest-cov** para coverage.
+
+```bash
+# Instalar dependencias de desarrollo
+pip3 install -r requirements.txt
+
+# Ejecutar tests
+make test
+
+# Ejecutar tests con coverage
+make test-cov
+
+# Ejecutar linter
+make lint
+```
+
+### Estructura de tests
+
+```
+tests/
+├── conftest.py              # Fixtures compartidos
+├── test_constants.py        # Tests de constantes
+├── test_state.py           # Tests de GameState
+├── test_base_level.py      # Tests de interfaz BaseLevel
+├── test_srp_level.py       # Tests del nivel SRP
+├── test_ocp_level.py       # Tests del nivel OCP
+└── test_lsp_level.py       # Tests del nivel LSP
+```
+
+### CI/CD
+
+Los tests corren automáticamente en GitHub Actions en cada PR:
+- Python 3.10, 3.11, 3.12
+- Coverage reporting con Codecov
+- Linting con flake8
 
 ---
 
