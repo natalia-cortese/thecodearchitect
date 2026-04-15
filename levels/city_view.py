@@ -189,29 +189,6 @@ class CityView:
         self.node_stats.x = int(w * 0.28); self.node_stats.y = int(h * 0.58)
         self.node_repo.x  = int(w * 0.72); self.node_repo.y  = int(h * 0.58)
 
-    def update(self, dt: float, state: GameState):
-        self.frame += 1
-        self._update_node_positions()
-
-        # Sincronizar visibilidad con estado
-        self.node_stats.visible = state.stats_created
-        self.node_repo.visible  = state.repo_created
-
-        # Color del nodo Video según estado
-        if state.broken:
-            self.node_video.color = C_DANGER
-        elif state.step >= STEP_DONE:
-            self.node_video.color = C_SUCCESS
-        else:
-            self.node_video.color = C_ACCENT
-
-        for wire in self.wires:
-            wire.update()
-
-        self.node_video.update(dt)
-        self.node_stats.update(dt)
-        self.node_repo.update(dt)
-
     def draw(self) -> pygame.Surface:
         surf = self.surf
         surf.fill(C_BG)
