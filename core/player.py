@@ -1,26 +1,11 @@
 """
-Sistema de jugadores y puntuación local.
-Guarda en un archivo JSON para persistencia.
+Sistema de jugadores y puntuación.
 Compatible con desktop y WebAssembly (Pygbag).
 """
 
 import json
-import os
 import sys
 from pathlib import Path
-
-
-def _get_data_dir() -> Path:
-    if getattr(sys, 'frozen', False):
-        return Path.cwd() / ".code_architect"
-    try:
-        return Path.home() / ".code_architect"
-    except Exception:
-        return Path.cwd() / ".code_architect"
-
-DATA_DIR = _get_data_dir()
-PLAYERS_FILE = DATA_DIR / "players.json"
-CURRENT_FILE = DATA_DIR / "current_player.txt"
 
 
 class Player:
@@ -56,7 +41,6 @@ class PlayerManager:
     _instance = None
 
     def __init__(self):
-        self._ensure_data_dir()
         self._players: dict[str, Player] = {}
         self._current_player: Player | None = None
         self._load_players()
@@ -67,25 +51,63 @@ class PlayerManager:
             cls._instance = cls()
         return cls._instance
 
-    def _ensure_data_dir(self):
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-
     def _load_players(self):
-        if PLAYERS_FILE.exists():
-            try:
-                with open(PLAYERS_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+        try:
+            if sys.platform == "emscripten":
+                import js
+                data = js.eval("localStorage.getItem('code_architect_players')")
+                if data:
+                    parsed = json.loads(data)
                     self._players = {
                         name: Player.from_dict(pdata)
-                        for name, pdata in data.items()
+                        for name, pdata in parsed.items()
                     }
-            except (json.JSONDecodeError, KeyError):
-                self._players = {}
+                    current = js.eval("localStorage.getItem('code_architect_current')")
+                    if current and current in self._players:
+                        self._current_player = self._players[current]
+            else:
+                data_dir = Path.home() / ".code_architect"
+                data_dir.mkdir(parents=True, exist_ok=True)
+                players_file = data_dir / "players.json"
+                current_file = data_dir / "current_player.txt"
+                
+                if players_file.exists():
+                    with open(players_file, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        self._players = {
+                            name: Player.from_dict(pdata)
+                            for name, pdata in data.items()
+                        }
+                
+                if current_file.exists():
+                    current = current_file.read_text().strip()
+                    if current in self._players:
+                        self._current_player = self._players[current]
+        except Exception as e:
+            print(f"Warning: Could not load players: {e}")
+            self._players = {}
 
     def _save_players(self):
-        with open(PLAYERS_FILE, "w", encoding="utf-8") as f:
-            data = {name: p.to_dict() for name, p in self._players.items()}
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        try:
+            if sys.platform == "emscripten":
+                import js
+                players_json = json.dumps({n: p.to_dict() for n, p in self._players.items()})
+                js.eval(f"localStorage.setItem('code_architect_players', '{players_json.replace(chr(39), chr(34))}')")
+                if self._current_player:
+                    js.eval(f"localStorage.setItem('code_architect_current', \"{self._current_player.name}\")")
+            else:
+                data_dir = Path.home() / ".code_architect"
+                data_dir.mkdir(parents=True, exist_ok=True)
+                players_file = data_dir / "players.json"
+                current_file = data_dir / "current_player.txt"
+                
+                with open(players_file, "w", encoding="utf-8") as f:
+                    json.dump({n: p.to_dict() for n, p in self._players.items()}, f, indent=2)
+                
+                if self._current_player:
+                    current_file.write_text(self._current_player.name)
+        except Exception as e:
+            print(f"Warning: Could not save players: {e}")
 
     def get_all_players(self) -> list[Player]:
         return list(self._players.values())
@@ -102,39 +124,24 @@ class PlayerManager:
         else:
             player = Player(name)
             self._players[name] = player
-            self._save_players()
         self._current_player = player
-        self._save_current_player()
+        self._save_players()
         return player
 
     def login_player(self, name: str) -> Player | None:
         name = name.strip()
         if name in self._players:
             self._current_player = self._players[name]
-            self._save_current_player()
+            self._save_players()
             return self._current_player
         return None
 
     def get_current_player(self) -> Player | None:
-        if self._current_player is None:
-            last_name = self._get_last_player_name()
-            if last_name and last_name in self._players:
-                self._current_player = self._players[last_name]
         return self._current_player
 
     def logout(self):
         self._current_player = None
-        if CURRENT_FILE.exists():
-            CURRENT_FILE.unlink()
-
-    def _get_last_player_name(self) -> str | None:
-        if CURRENT_FILE.exists():
-            return CURRENT_FILE.read_text().strip()
-        return None
-
-    def _save_current_player(self):
-        if self._current_player:
-            CURRENT_FILE.write_text(self._current_player.name)
+        self._save_players()
 
     def update_score(self, level: str, score: int) -> bool:
         player = self.get_current_player()
