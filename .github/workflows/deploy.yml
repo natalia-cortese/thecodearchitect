@@ -43,6 +43,7 @@ jobs:
           mkdir -p build/web/game
           cp -r build/web/* build/web/game/ 2>/dev/null || true
           cp index.html build/web/index.html
+          touch build/web/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
