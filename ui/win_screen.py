@@ -33,8 +33,9 @@ class WinScreen:
         self.screen  = screen
         self.visible = False
         self._frame  = 0
-        self._btn_next    = pygame.Rect(0, 0, 260, 48)
-        self._btn_restart = pygame.Rect(0, 0, 260, 48)
+        self._btn_next    = pygame.Rect(0, 0, 200, 48)
+        self._btn_restart = pygame.Rect(0, 0, 200, 48)
+        self._btn_menu    = pygame.Rect(0, 0, 160, 48)
         self._has_next    = False  # actualizado en draw(); usado en handle_click
 
     def handle_click(self, pos) -> str | None:
@@ -42,6 +43,8 @@ class WinScreen:
             return "next"
         if self._btn_restart.collidepoint(pos):
             return "restart"
+        if self._btn_menu.collidepoint(pos):
+            return "menu"
         return None
 
     def draw(self, state: GameState, level_index: int = 0, total_levels: int = 1):
@@ -95,17 +98,25 @@ class WinScreen:
             s.blit(text,  (cx - box_w // 2 + 36, y))
             y += 22
 
-        # Botones: "Siguiente nivel" destacado a la izquierda si hay más niveles
+        # Botones: tres botones en fila
         self._has_next = level_index < total_levels - 1
         mouse = pygame.mouse.get_pos()
         by = SCREEN_HEIGHT - 88
-        bw, bh = 260, 48
+        bw, bh = 200, 48
+        bm, _ = self._btn_menu.size
         cx = SCREEN_WIDTH // 2
-        gap = 24
+        gap = 16
+
+        # Siempre mostrar "Menú" a la derecha
+        self._btn_menu.x = cx + bw + gap
+        self._btn_menu.y = by
+        self._btn_menu.w = 160
+        self._btn_menu.h = bh
+        self._draw_btn(s, self._btn_menu, "☰  MENÚ", C_DIM, mouse)
 
         if self._has_next:
-            # Dos botones: Siguiente nivel (principal, izq.) y Jugar de nuevo (der.)
-            total_w = 2 * bw + gap
+            # Tres botones: Siguiente nivel, Jugar de nuevo, Menú
+            total_w = bw * 2 + gap + 160 + gap
             left_x = cx - total_w // 2
             self._btn_next.x = left_x
             self._btn_next.y = by
@@ -115,15 +126,15 @@ class WinScreen:
             self._btn_restart.y = by
             self._btn_restart.w = bw
             self._btn_restart.h = bh
-            self._draw_btn(s, self._btn_next, "▶  SIGUIENTE NIVEL", C_SUCCESS, mouse)
-            self._draw_btn(s, self._btn_restart, "↺  JUGAR DE NUEVO", C_DIM, mouse)
+            self._draw_btn(s, self._btn_next, "▶  SIGUIENTE", C_SUCCESS, mouse)
+            self._draw_btn(s, self._btn_restart, "↺  REINICIAR", C_DIM, mouse)
         else:
-            # Solo "Jugar de nuevo" centrado (último nivel)
-            self._btn_restart.x = cx - bw // 2
+            # Dos botones: Jugar de nuevo (izq.) y Menú (der.)
+            self._btn_restart.x = cx - bw - gap // 2
             self._btn_restart.y = by
             self._btn_restart.w = bw
             self._btn_restart.h = bh
-            self._draw_btn(s, self._btn_restart, "↺  JUGAR DE NUEVO", C_CYAN, mouse)
+            self._draw_btn(s, self._btn_restart, "↺  REINICIAR", C_CYAN, mouse)
 
     def _draw_btn(self, surf, rect, label, color, mouse):
         hovered = rect.collidepoint(mouse)
