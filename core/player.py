@@ -1,14 +1,24 @@
 """
 Sistema de jugadores y puntuación local.
 Guarda en un archivo JSON para persistencia.
+Compatible con desktop y WebAssembly (Pygbag).
 """
 
 import json
 import os
+import sys
 from pathlib import Path
 
 
-DATA_DIR = Path.home() / ".code_architect"
+def _get_data_dir() -> Path:
+    if getattr(sys, 'frozen', False):
+        return Path.cwd() / ".code_architect"
+    try:
+        return Path.home() / ".code_architect"
+    except Exception:
+        return Path.cwd() / ".code_architect"
+
+DATA_DIR = _get_data_dir()
 PLAYERS_FILE = DATA_DIR / "players.json"
 CURRENT_FILE = DATA_DIR / "current_player.txt"
 

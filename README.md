@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
 ![Pygame](https://img.shields.io/badge/Pygame-2.5+-green?logo=pygame)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Nivel](https://img.shields.io/badge/Nivel-1%20de%205-orange)
+![Nivel](https://img.shields.io/badge/Nivel-4%20de%205-orange)
 
 ---
 
@@ -69,6 +69,32 @@ Aplicar la herramienta de **refactorización** para separar en:
 - **Simulación del desastre**: tocá "Actualizar cálculo" y mirá cómo se rompe la ciudad
 - **Código Python real** con resaltado de sintaxis en el panel lateral
 - **Métricas en tiempo real**: Mantenibilidad, Estabilidad y Puntos
+
+---
+
+## 🎮 Pantalla de Menú y Sistema de Jugadores
+
+Al iniciar el juego, verás una **pantalla de menú** donde podrás:
+
+- **Ingresar tu nombre** para crear un perfil de jugador
+- **Elegir cualquier nivel** de la lista para jugar en el orden que prefieras
+- **Ver tu puntaje** acumulado y el de otros jugadores (leaderboard local)
+- **Volver al menú** en cualquier momento desde la pantalla de victoria
+
+### Cómo funciona el sistema de puntajes
+
+- Tu nombre y puntajes se guardan en `~/.code_architect/players.json`
+- Solo se guarda el **mayor puntaje** por nivel
+- Podés jugar cada nivel **cuantas veces quieras** para mejorar tu score
+- El leaderboard muestra los **top 5 jugadores** según puntaje total
+
+### Controles del juego
+
+| Tecla / Acción | Función |
+|----------------|---------|
+| `ESC` | Volver al menú principal |
+| `1` `2` `3` | Ver pestañas de código |
+| Click en botones | Acciones del panel lateral |
 
 ---
 
