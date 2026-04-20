@@ -3,9 +3,6 @@ Tests for core/player.py
 """
 
 import pytest
-import tempfile
-import os
-from pathlib import Path
 from unittest.mock import patch
 
 
@@ -68,22 +65,17 @@ class TestPlayer:
 
 
 class TestPlayerManager:
-    """Test PlayerManager class with temp directory."""
+    """Test PlayerManager class."""
 
     @pytest.fixture
-    def temp_dir(self, tmp_path):
-        return tmp_path
-
-    @pytest.fixture
-    def manager(self, temp_dir):
-        with patch("core.player.DATA_DIR", temp_dir):
-            with patch("core.player.PLAYERS_FILE", temp_dir / "players.json"):
-                with patch("core.player.CURRENT_FILE", temp_dir / "current.txt"):
-                    from core.player import PlayerManager
-                    PlayerManager._instance = None
-                    m = PlayerManager()
-                    yield m
-                    PlayerManager._instance = None
+    def manager(self):
+        with patch("sys.platform", "linux"):
+            from core.player import PlayerManager
+            PlayerManager._instance = None
+            m = PlayerManager()
+            m._players.clear()
+            yield m
+            PlayerManager._instance = None
 
     def test_create_player(self, manager):
         player = manager.create_player("Alice")
@@ -117,7 +109,6 @@ class TestPlayerManager:
         manager.logout()
         p2 = manager.create_player("Player2")
         p2.set_score("srp", 200)
-        manager.logout()
 
         lb = manager.get_leaderboard()
         assert lb[0].name == "Player2"
