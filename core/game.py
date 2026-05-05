@@ -15,8 +15,9 @@ from levels.srp_level import SRPLevel
 from levels.ocp_level import OCPLevel
 from levels.lsp_level import LSPLevel
 from levels.isp_level import ISPLevel
+from levels.dip_level import DIPLevel
 
-LEVELS = [SRPLevel, OCPLevel, LSPLevel, ISPLevel]
+LEVELS = [SRPLevel, OCPLevel, LSPLevel, ISPLevel, DIPLevel]
 
 
 class Game:

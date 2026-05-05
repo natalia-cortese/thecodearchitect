@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
 ![Pygame](https://img.shields.io/badge/Pygame-2.5+-green?logo=pygame)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Nivel](https://img.shields.io/badge/Nivel-4%20de%205-orange)
+![Nivel](https://img.shields.io/badge/Nivel-5%20de%205-orange)
 
 ---
 
@@ -25,7 +25,7 @@ Cada nivel enseña uno de los cinco principios SOLID usando mecánicas de juego,
 | 2 | **O** — Open/Closed (OCP) | ✅ Disponible |
 | 3 | **L** — Liskov Substitution (LSP) | ✅ Disponible |
 | 4 | **I** — Interface Segregation (ISP) | ✅ Disponible |
-| 5 | **D** — Dependency Inversion (DIP) | 🔜 Planeado |
+| 5 | **D** — Dependency Inversion (DIP) | ✅ Disponible |
 
 ---
 
